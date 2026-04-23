@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookStore Catalog | Scraped Products</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+                <h1>BookStore Catalog</h1>
+            </div>
+            <p class="subtitle">E-Commerce Product Scraper Results</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Statistics Dashboard -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-value" id="totalProducts">0</span>
+                <span class="stat-label">Total Products</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="avgPrice">£0.00</span>
+                <span class="stat-label">Average Price</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="avgRating">0.0</span>
+                <span class="stat-label">Average Rating</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="inStock">0</span>
+                <span class="stat-label">In Stock</span>
+            </div>
+        </section>
+
+        <!-- Controls -->
+        <section class="controls">
+            <div class="search-box">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search by product name...">
+            </div>
+            <div class="filters">
+                <select id="sortSelect">
+                    <option value="default">Sort By</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="rating-desc">Rating: High to Low</option>
+                    <option value="rating-asc">Rating: Low to High</option>
+                    <option value="name-asc">Name: A-Z</option>
+                </select>
+                <select id="availabilityFilter">
+                    <option value="all">All Availability</option>
+                    <option value="In stock">In Stock</option>
+                    <option value="Out of stock">Out of Stock</option>
+                </select>
+                <select id="ratingFilter">
+                    <option value="all">All Ratings</option>
+                    <option value="5">5 Stars</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="3">3+ Stars</option>
+                    <option value="2">2+ Stars</option>
+                    <option value="1">1+ Stars</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Product Grid -->
+        <section id="productGrid" class="product-grid">
+            <div class="loading">Loading products...</div>
+        </section>
+
+        <!-- Pagination -->
+        <section class="pagination" id="pagination"></section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Data scraped from <a href="http://books.toscrape.com" target="_blank">books.toscrape.com</a> for educational purposes.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
