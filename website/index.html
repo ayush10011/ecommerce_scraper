@@ -5,89 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BookStore Catalog | Scraped Products</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Header -->
     <header class="header">
-        <div class="container">
+        <div class="header-bg"></div>
+        <div class="header-blob blob-1"></div>
+        <div class="header-blob blob-2"></div>
+        <div class="container header-content">
             <div class="logo">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                </svg>
-                <h1>BookStore Catalog</h1>
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1>BookStore Catalog</h1>
+                    <p class="subtitle">E-Commerce Product Scraper Results</p>
+                </div>
             </div>
-            <p class="subtitle">E-Commerce Product Scraper Results</p>
+            <div class="header-actions">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                    </svg>
+                    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                    </svg>
+                </button>
+            </div>
         </div>
     </header>
 
-    <main class="container">
+    <main class="container main-content">
         <!-- Statistics Dashboard -->
-        <section class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-value" id="totalProducts">0</span>
-                <span class="stat-label">Total Products</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value" id="avgPrice">£0.00</span>
-                <span class="stat-label">Average Price</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value" id="avgRating">0.0</span>
-                <span class="stat-label">Average Rating</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value" id="inStock">0</span>
-                <span class="stat-label">In Stock</span>
+        <section class="stats-section">
+            <h2 class="section-title">Dashboard Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card" data-stat="total">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <span class="stat-value" id="totalProducts">0</span>
+                        <span class="stat-label">Total Products</span>
+                    </div>
+                    <div class="stat-sparkline"></div>
+                </div>
+                <div class="stat-card" data-stat="price">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <span class="stat-value" id="avgPrice">£0.00</span>
+                        <span class="stat-label">Average Price</span>
+                    </div>
+                    <div class="stat-sparkline"></div>
+                </div>
+                <div class="stat-card" data-stat="rating">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <span class="stat-value" id="avgRating">0.0</span>
+                        <span class="stat-label">Average Rating</span>
+                    </div>
+                    <div class="stat-sparkline"></div>
+                </div>
+                <div class="stat-card" data-stat="stock">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <span class="stat-value" id="inStock">0</span>
+                        <span class="stat-label">In Stock</span>
+                    </div>
+                    <div class="stat-sparkline"></div>
+                </div>
             </div>
         </section>
 
         <!-- Controls -->
-        <section class="controls">
-            <div class="search-box">
-                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.35-4.35"/>
-                </svg>
-                <input type="text" id="searchInput" placeholder="Search by product name...">
-            </div>
-            <div class="filters">
-                <select id="sortSelect">
-                    <option value="default">Sort By</option>
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
-                    <option value="rating-desc">Rating: High to Low</option>
-                    <option value="rating-asc">Rating: Low to High</option>
-                    <option value="name-asc">Name: A-Z</option>
-                </select>
-                <select id="availabilityFilter">
-                    <option value="all">All Availability</option>
-                    <option value="In stock">In Stock</option>
-                    <option value="Out of stock">Out of Stock</option>
-                </select>
-                <select id="ratingFilter">
-                    <option value="all">All Ratings</option>
-                    <option value="5">5 Stars</option>
-                    <option value="4">4+ Stars</option>
-                    <option value="3">3+ Stars</option>
-                    <option value="2">2+ Stars</option>
-                    <option value="1">1+ Stars</option>
-                </select>
+        <section class="controls-section">
+            <div class="controls-card">
+                <div class="search-box">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search by product name..." autocomplete="off">
+                    <button id="clearSearch" class="clear-btn" aria-label="Clear search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Sort By</label>
+                        <select id="sortSelect" aria-label="Sort products by">
+                            <option value="default">Default</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="rating-desc">Rating: High to Low</option>
+                            <option value="rating-asc">Rating: Low to High</option>
+                            <option value="name-asc">Name: A-Z</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Availability</label>
+                        <select id="availabilityFilter" aria-label="Filter by availability">
+                            <option value="all">All</option>
+                            <option value="In stock">In Stock</option>
+                            <option value="Out of stock">Out of Stock</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Rating</label>
+                        <select id="ratingFilter" aria-label="Filter by minimum rating">
+                            <option value="all">All Ratings</option>
+                            <option value="5">5 Stars</option>
+                            <option value="4">4+ Stars</option>
+                            <option value="3">3+ Stars</option>
+                            <option value="2">2+ Stars</option>
+                            <option value="1">1+ Stars</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="results-count" id="resultsCount">Showing all products</div>
             </div>
         </section>
 
         <!-- Product Grid -->
         <section id="productGrid" class="product-grid">
-            <div class="loading">Loading products...</div>
+            <!-- Skeleton loaders -->
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-text short"></div><div class="skeleton-text"></div><div class="skeleton-text long"></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-text short"></div><div class="skeleton-text"></div><div class="skeleton-text long"></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-text short"></div><div class="skeleton-text"></div><div class="skeleton-text long"></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-text short"></div><div class="skeleton-text"></div><div class="skeleton-text long"></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-text short"></div><div class="skeleton-text"></div><div class="skeleton-text long"></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-text short"></div><div class="skeleton-text"></div><div class="skeleton-text long"></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-text short"></div><div class="skeleton-text"></div><div class="skeleton-text long"></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-text short"></div><div class="skeleton-text"></div><div class="skeleton-text long"></div></div>
         </section>
 
         <!-- Pagination -->
         <section class="pagination" id="pagination"></section>
     </main>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>Data scraped from <a href="http://books.toscrape.com" target="_blank">books.toscrape.com</a> for educational purposes.</p>
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    <span>BookStore Catalog</span>
+                </div>
+                <p class="footer-text">Data scraped from <a href="http://books.toscrape.com" target="_blank" rel="noopener noreferrer">books.toscrape.com</a> for educational purposes.</p>
+            </div>
         </div>
     </footer>
 

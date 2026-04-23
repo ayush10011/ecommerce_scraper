@@ -1,5 +1,5 @@
 // ==========================================
-// BookStore Catalog - Product Display App
+// BookStore Catalog - Modern Product Display
 // ==========================================
 
 const ITEMS_PER_PAGE = 24;
@@ -7,7 +7,58 @@ let allProducts = [];
 let filteredProducts = [];
 let currentPage = 1;
 
+// ==========================================
+// Toast Notifications
+// ==========================================
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    const icons = {
+        success: '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>',
+        error: '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg>',
+        info: '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>'
+    };
+    
+    toast.innerHTML = `${icons[type] || icons.info}<span>${message}</span>`;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('toast-exit');
+        toast.addEventListener('animationend', () => toast.remove());
+    }, 3500);
+}
+
+// ==========================================
+// Dark Mode
+// ==========================================
+function initTheme() {
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = saved === 'dark' || (!saved && prefersDark);
+    
+    if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        const isDarkNow = document.documentElement.hasAttribute('data-theme');
+        if (isDarkNow) {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+            showToast('Light mode enabled', 'info');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            showToast('Dark mode enabled', 'info');
+        }
+    });
+}
+
+// ==========================================
 // CSV Parser
+// ==========================================
 function parseCSV(text) {
     const lines = text.trim().split(/\r?\n/);
     if (lines.length < 2) return [];
@@ -24,7 +75,6 @@ function parseCSV(text) {
             product[h.trim()] = values[idx]?.trim() || '';
         });
         
-        // Parse numeric fields
         const priceMatch = product.Price?.match(/[\d.]+/);
         product.priceNum = priceMatch ? parseFloat(priceMatch[0]) : 0;
         
@@ -65,9 +115,10 @@ function parseCSVLine(line) {
     return result;
 }
 
-// Load CSV data
+// ==========================================
+// Load Products
+// ==========================================
 async function loadProducts() {
-    // Try multiple paths to locate products.csv
     const paths = ['../products.csv', 'products.csv'];
     let lastErr = null;
 
@@ -79,7 +130,9 @@ async function loadProducts() {
             allProducts = parseCSV(text);
             filteredProducts = [...allProducts];
             updateStats();
+            updateResultsCount();
             renderPage();
+            showToast(`Loaded ${allProducts.length} products`, 'success');
             return;
         } catch (err) {
             lastErr = err;
@@ -88,17 +141,19 @@ async function loadProducts() {
 
     document.getElementById('productGrid').innerHTML = `
         <div class="empty-state">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="m15 9-6 6"/><path d="m9 9 6 6"/>
+            <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/>
             </svg>
-            <p>Error loading products: ${lastErr?.message || 'Failed to load CSV'}</p>
-            <p style="font-size:0.85rem;margin-top:0.5rem">Make sure products.csv exists in the parent folder, or run a local HTTP server (e.g., <code>python -m http.server</code> or VS Code Live Server).</p>
+            <h3>Failed to load products</h3>
+            <p>${lastErr?.message || 'Could not load CSV file'}. Make sure products.csv exists and you're running a local server.</p>
         </div>
     `;
+    showToast('Failed to load products', 'error');
 }
 
-// Update statistics dashboard
+// ==========================================
+// Stats Dashboard
+// ==========================================
 function updateStats() {
     const total = allProducts.length;
     const prices = allProducts.map(p => p.priceNum).filter(p => p > 0);
@@ -116,14 +171,14 @@ function updateStats() {
 
 function animateNumber(id, value, decimals, prefix = '') {
     const el = document.getElementById(id);
-    const duration = 800;
+    const duration = 1000;
     const start = performance.now();
     const from = 0;
     
     function tick(now) {
         const elapsed = now - start;
         const progress = Math.min(elapsed / duration, 1);
-        const ease = 1 - Math.pow(1 - progress, 3);
+        const ease = 1 - Math.pow(1 - progress, 4);
         const current = from + (value - from) * ease;
         el.textContent = prefix + current.toFixed(decimals);
         if (progress < 1) requestAnimationFrame(tick);
@@ -132,7 +187,45 @@ function animateNumber(id, value, decimals, prefix = '') {
     requestAnimationFrame(tick);
 }
 
+// ==========================================
+// Results Count
+// ==========================================
+function updateResultsCount() {
+    const el = document.getElementById('resultsCount');
+    const count = filteredProducts.length;
+    const total = allProducts.length;
+    
+    if (count === total) {
+        el.textContent = `Showing all ${total.toLocaleString()} products`;
+    } else if (count === 0) {
+        el.textContent = 'No products match your filters';
+    } else {
+        el.textContent = `Showing ${count.toLocaleString()} of ${total.toLocaleString()} products`;
+    }
+}
+
+// ==========================================
+// Clear Search
+// ==========================================
+function initClearSearch() {
+    const input = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearSearch');
+    
+    input.addEventListener('input', () => {
+        clearBtn.classList.toggle('visible', input.value.length > 0);
+    });
+    
+    clearBtn.addEventListener('click', () => {
+        input.value = '';
+        clearBtn.classList.remove('visible');
+        applyFilters();
+        input.focus();
+    });
+}
+
+// ==========================================
 // Filter & Sort
+// ==========================================
 function applyFilters() {
     const search = document.getElementById('searchInput').value.toLowerCase().trim();
     const availability = document.getElementById('availabilityFilter').value;
@@ -146,7 +239,6 @@ function applyFilters() {
         return matchesSearch && matchesAvail && matchesRating;
     });
     
-    // Sort
     switch (sort) {
         case 'price-asc':
             filteredProducts.sort((a, b) => a.priceNum - b.priceNum);
@@ -166,10 +258,13 @@ function applyFilters() {
     }
     
     currentPage = 1;
+    updateResultsCount();
     renderPage();
 }
 
-// Render stars
+// ==========================================
+// Render Stars
+// ==========================================
 function renderStars(rating) {
     let html = '';
     for (let i = 1; i <= 5; i++) {
@@ -178,7 +273,9 @@ function renderStars(rating) {
     return html;
 }
 
-// Render page
+// ==========================================
+// Render Page
+// ==========================================
 function renderPage() {
     const grid = document.getElementById('productGrid');
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -188,42 +285,55 @@ function renderPage() {
     if (pageItems.length === 0) {
         grid.innerHTML = `
             <div class="empty-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.35-4.35"/>
+                <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                 </svg>
-                <p>No products match your filters.</p>
+                <h3>No products found</h3>
+                <p>Try adjusting your search or filter criteria.</p>
             </div>
         `;
         document.getElementById('pagination').innerHTML = '';
         return;
     }
     
-    grid.innerHTML = pageItems.map(p => {
+    grid.innerHTML = pageItems.map((p, idx) => {
         const availClass = p.Availability?.toLowerCase().includes('in stock') ? 'in-stock' : 'out-of-stock';
-        const dot = p.Availability?.toLowerCase().includes('in stock') 
-            ? '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:4px;"></span>' 
-            : '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:4px;opacity:0.5;"></span>';
+        const dotClass = availClass === 'in-stock' ? '' : 'out';
+        const availText = p.Availability || 'Unknown';
         
         return `
-            <article class="product-card">
-                <img src="${p.Image || ''}" alt="${p.Name}" class="product-image" loading="lazy" 
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div style="display:none;height:320px;align-items:center;justify-content:center;background:var(--gray-100);color:var(--gray-400);font-size:0.9rem;">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <path d="m21 15-5-5L5 21"/>
-                    </svg>
+            <article class="product-card" style="animation-delay: ${idx * 0.04}s">
+                <div class="product-image-wrap">
+                    <img src="${p.Image || ''}" alt="${p.Name}" class="product-image" loading="lazy" 
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="image-placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
+                        </svg>
+                        <span>No Image</span>
+                    </div>
+                    ${p.ratingNum > 0 ? `
+                    <div class="rating-badge">
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        ${p.ratingNum}
+                    </div>` : ''}
                 </div>
                 <div class="product-info">
                     <h3 class="product-title" title="${p.Name}">${p.Name}</h3>
                     <div class="product-meta">
-                        <span class="product-price">${p.Price}</span>
-                        <span class="product-rating">${renderStars(p.ratingNum)} ${p.ratingNum > 0 ? p.ratingNum + '/5' : ''}</span>
+                        <span class="product-price">${p.Price || 'N/A'}</span>
+                        <span class="product-rating">${renderStars(p.ratingNum)}</span>
                     </div>
-                    <span class="product-availability ${availClass}">${dot}${p.Availability}</span>
-                    <a href="${p.URL}" target="_blank" rel="noopener" class="product-link">View Product</a>
+                    <span class="product-availability ${availClass}">
+                        <span class="avail-dot ${dotClass}"></span>
+                        ${availText}
+                    </span>
+                    <a href="${p.URL}" target="_blank" rel="noopener noreferrer" class="product-link">
+                        View Product
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                        </svg>
+                    </a>
                 </div>
             </article>
         `;
@@ -232,7 +342,9 @@ function renderPage() {
     renderPagination();
 }
 
-// Render pagination
+// ==========================================
+// Pagination
+// ==========================================
 function renderPagination() {
     const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
     const pagination = document.getElementById('pagination');
@@ -245,7 +357,9 @@ function renderPagination() {
     let html = '';
     
     // Prev
-    html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">←</button>`;
+    html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})" aria-label="Previous page">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+    </button>`;
     
     // Page numbers
     const maxButtons = 5;
@@ -271,7 +385,9 @@ function renderPagination() {
     }
     
     // Next
-    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">→</button>`;
+    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})" aria-label="Next page">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+    </button>`;
     
     pagination.innerHTML = html;
 }
@@ -282,16 +398,9 @@ function goToPage(page) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    loadProducts();
-    
-    document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 250));
-    document.getElementById('sortSelect').addEventListener('change', applyFilters);
-    document.getElementById('availabilityFilter').addEventListener('change', applyFilters);
-    document.getElementById('ratingFilter').addEventListener('change', applyFilters);
-});
-
+// ==========================================
+// Debounce
+// ==========================================
 function debounce(fn, delay) {
     let timer;
     return function(...args) {
@@ -300,3 +409,16 @@ function debounce(fn, delay) {
     };
 }
 
+// ==========================================
+// Event Listeners
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    initClearSearch();
+    loadProducts();
+    
+    document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 250));
+    document.getElementById('sortSelect').addEventListener('change', applyFilters);
+    document.getElementById('availabilityFilter').addEventListener('change', applyFilters);
+    document.getElementById('ratingFilter').addEventListener('change', applyFilters);
+});
